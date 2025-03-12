@@ -73,6 +73,80 @@
 | insights        | TEXT      | NULL                 |
 | generated_at    | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP |
 
+classDiagram
+    class Team {
+        +String teamId
+        +String teamName
+        +String department
+        +Date createdAt
+        +getTeamMembers()
+        +calculateTeamProfile()
+    }
+    
+    class TeamMember {
+        +String memberId
+        +String teamId
+        +String name
+        +String role
+        +Date joinedDate
+        +getWorkPreferences()
+    }
+    
+    class WorkPreference {
+        +String preferenceId
+        +String memberId
+        +Number workStyleScore
+        +Number communicationStyleScore
+        +Number collaborationScore
+        +String[] strengthTags
+        +Date updatedAt
+    }
+    
+    class Candidate {
+        +String candidateId
+        +String name
+        +String email
+        +String position
+        +Date applicationDate
+        +getCompatibilityResults()
+    }
+    
+    class CompatibilityResult {
+        +String resultId
+        +String candidateId
+        +String teamId
+        +Number overallScore
+        +Object dimensionScores
+        +String[] strengthAreas
+        +String[] challengeAreas
+        +Date generatedAt
+        +generateInsights()
+    }
+    
+    class Question {
+        +String questionId
+        +String questionText
+        +String category
+        +String[] responseOptions
+        +Number weight
+    }
+    
+    class Response {
+        +String responseId
+        +String questionId
+        +String respondentId
+        +String respondentType
+        +String responseValue
+        +Date submittedAt
+    }
+
+    Team "1" --o "*" TeamMember : has
+    TeamMember "1" --o "1" WorkPreference : has
+    Candidate "1" --o "*" CompatibilityResult : receives
+    Team "1" --o "*" CompatibilityResult : generates for
+    Question "1" --o "*" Response : collects
+    Candidate "1" --o "*" Response : provides
+    TeamMember "1" --o "*" Response : provides
 ## Backend Structure & Functions
 
 ### 1. FastAPI App Entry Point
