@@ -73,6 +73,7 @@
 | insights        | TEXT      | NULL                 |
 | generated_at    | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP |
 
+```mermaid
 classDiagram
     class Team {
         +String teamId
@@ -147,6 +148,7 @@ classDiagram
     Question "1" --o "*" Response : collects
     Candidate "1" --o "*" Response : provides
     TeamMember "1" --o "*" Response : provides
+
 ## Backend Structure & Functions
 
 ### 1. FastAPI App Entry Point
