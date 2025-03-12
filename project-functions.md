@@ -1,249 +1,300 @@
-# Backend Functions
+# Teamwork Compatibility Checker - Project Structure & Functions
 
-## Core Files
+## Database Schema
 
-### `backend/app/main.py`
-- `create_app()`: Creates and configures the FastAPI application
-- `setup_routes()`: Registers API routes
-- `setup_middleware()`: Configures CORS and other middleware
-- Root endpoint for API health check
+### Table: teams
+| Column      | Type      | Constraints          |
+|-------------|-----------|----------------------|
+| id          | INTEGER   | PRIMARY KEY          |
+| name        | VARCHAR   | NOT NULL             |
+| department  | VARCHAR   | NOT NULL             |
+| created_at  | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP |
 
-### `backend/app/core/config.py`
-- `get_settings()`: Returns application settings from environment variables
-- Class containing all configuration variables and their default values
+### Table: team_members
+| Column      | Type      | Constraints          |
+|-------------|-----------|----------------------|
+| id          | INTEGER   | PRIMARY KEY          |
+| team_id     | INTEGER   | FOREIGN KEY (teams.id) |
+| name        | VARCHAR   | NOT NULL             |
+| role        | VARCHAR   | NOT NULL             |
+| joined_date | TIMESTAMP | NOT NULL             |
+| created_at  | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP |
 
-### `backend/app/core/security.py`
-- `create_access_token()`: Creates JWT tokens for authentication
-- `verify_token()`: Verifies JWT tokens
-- `get_password_hash()`: Hashes passwords
-- `verify_password()`: Verifies password hashes
-- Authentication dependency for protected endpoints
+### Table: work_preferences
+| Column                   | Type    | Constraints          |
+|--------------------------|---------|----------------------|
+| id                       | INTEGER | PRIMARY KEY          |
+| member_id                | INTEGER | FOREIGN KEY (team_members.id) |
+| work_style_score         | INTEGER | NOT NULL             |
+| communication_style_score| INTEGER | NOT NULL             |
+| collaboration_score      | INTEGER | NOT NULL             |
+| strength_tags            | JSON    | NULL                 |
+| updated_at               | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP |
 
-## API Endpoints
+### Table: candidates
+| Column          | Type      | Constraints          |
+|-----------------|-----------|----------------------|
+| id              | INTEGER   | PRIMARY KEY          |
+| name            | VARCHAR   | NOT NULL             |
+| email           | VARCHAR   | UNIQUE, NOT NULL     |
+| position        | VARCHAR   | NOT NULL             |
+| application_date| TIMESTAMP | NOT NULL             |
+| created_at      | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP |
 
-### `backend/app/api/api_v1/endpoints/candidates.py`
-- `get_candidates()`: Retrieve list of candidates
-- `get_candidate()`: Retrieve a specific candidate by ID
-- `create_candidate()`: Create a new candidate
-- `update_candidate()`: Update a candidate's information
-- `delete_candidate()`: Delete a candidate
+### Table: questions
+| Column          | Type      | Constraints          |
+|-----------------|-----------|----------------------|
+| id              | INTEGER   | PRIMARY KEY          |
+| text            | VARCHAR   | NOT NULL             |
+| category        | VARCHAR   | NOT NULL             |
+| response_options| JSON      | NOT NULL             |
+| weight          | FLOAT     | DEFAULT 1.0          |
 
-### `backend/app/api/api_v1/endpoints/teams.py`
-- `get_teams()`: Retrieve list of teams
-- `get_team()`: Retrieve a specific team by ID
+### Table: responses
+| Column          | Type      | Constraints          |
+|-----------------|-----------|----------------------|
+| id              | INTEGER   | PRIMARY KEY          |
+| question_id     | INTEGER   | FOREIGN KEY (questions.id) |
+| respondent_id   | INTEGER   | NOT NULL             |
+| respondent_type | VARCHAR   | NOT NULL             |
+| value           | VARCHAR   | NOT NULL             |
+| submitted_at    | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP |
+
+### Table: compatibility_results
+| Column          | Type      | Constraints          |
+|-----------------|-----------|----------------------|
+| id              | INTEGER   | PRIMARY KEY          |
+| candidate_id    | INTEGER   | FOREIGN KEY (candidates.id) |
+| team_id         | INTEGER   | FOREIGN KEY (teams.id) |
+| overall_score   | FLOAT     | NOT NULL             |
+| dimension_scores| JSON      | NOT NULL             |
+| strengths       | JSON      | NULL                 |
+| challenges      | JSON      | NULL                 |
+| insights        | TEXT      | NULL                 |
+| generated_at    | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP |
+
+## Backend Structure & Functions
+
+### 1. FastAPI App Entry Point
+**File: `backend/app/main.py`**
+- Initialize FastAPI application
+- Configure CORS
+- Include API routers
+- Health check endpoint
+
+### 2. Database Models & ORM
+**File: `backend/app/models/team.py`**
+- `Team` model definition
+- Relationships to team members and compatibility results
+
+**File: `backend/app/models/team_member.py`**
+- `TeamMember` model definition
+- Relationship to work preferences and teams
+
+**File: `backend/app/models/candidate.py`**
+- `Candidate` model definition
+- Relationship to responses and compatibility results
+
+**File: `backend/app/models/question.py`**
+- `Question` model definition
+- Category and response options
+
+**File: `backend/app/models/response.py`**
+- `Response` model for storing answers
+- Polymorphic relationship to team members or candidates
+
+**File: `backend/app/models/compatibility.py`**
+- `CompatibilityResult` model
+- Store scores, strengths, challenges, and AI insights
+
+### 3. API Endpoints
+
+**File: `backend/app/api/endpoints/teams.py`**
+Functions:
 - `create_team()`: Create a new team
-- `update_team()`: Update a team's information
-- `delete_team()`: Delete a team
+- `get_teams()`: Get list of all teams
+- `get_team()`: Get team details by ID
 - `add_team_member()`: Add a member to a team
-- `remove_team_member()`: Remove a member from a team
+- `get_team_members()`: Get all members of a team
 
-### `backend/app/api/api_v1/endpoints/questionnaires.py`
-- `get_questionnaires()`: Retrieve list of questionnaires
-- `get_questionnaire()`: Retrieve a specific questionnaire
-- `create_questionnaire()`: Create a new questionnaire
-- `update_questionnaire()`: Update a questionnaire
-- `delete_questionnaire()`: Delete a questionnaire
-- `submit_questionnaire_response()`: Submit responses to a questionnaire
+**File: `backend/app/api/endpoints/candidates.py`**
+Functions:
+- `create_candidate()`: Create a new candidate
+- `get_candidates()`: Get list of all candidates
+- `get_candidate()`: Get candidate details by ID
+- `add_candidate_responses()`: Add questionnaire responses for a candidate
 
-### `backend/app/api/api_v1/endpoints/compatibility.py`
-- `calculate_compatibility()`: Calculate compatibility between a candidate and team
-- `get_team_compatibility_report()`: Generate detailed compatibility report
-- `get_top_compatible_candidates()`: Get ranked list of candidates by compatibility
-- `get_compatibility_visualization_data()`: Get data formatted for visualizations
+**File: `backend/app/api/endpoints/questions.py`**
+Functions:
+- `create_question()`: Create a new question
+- `get_questions()`: Get all questions, optionally filtered by category
+- `update_question()`: Update an existing question
 
-## Database Models
+**File: `backend/app/api/endpoints/compatibility.py`**
+Functions:
+- `calculate_compatibility()`: Generate compatibility analysis between team and candidate
+- `get_compatibility_result()`: Get a specific compatibility result
+- `get_team_compatibility_results()`: Get all compatibility results for a team
 
-### `backend/app/models/candidate.py`
-- `Candidate` class: SQLAlchemy ORM model for candidates
-- Relationships to questionnaire responses
+### 4. Business Logic Services
 
-### `backend/app/models/team.py`
-- `Team` class: SQLAlchemy ORM model for teams
-- `TeamMember` class: Association model for team memberships
-- Relationships to team members and questionnaire responses
+**File: `backend/app/services/team_service.py`**
+Functions:
+- `create_team_with_members()`: Create a team with initial members
+- `calculate_team_profile()`: Generate aggregate team profile
+- `add_member_with_preferences()`: Add team member with work preferences
 
-### `backend/app/models/questionnaire.py`
-- `Questionnaire` class: SQLAlchemy ORM model for questionnaire templates
-- `Question` class: Model for individual questions
-- `QuestionResponse` class: Model for responses to questions
-- `ResponseSet` class: Model grouping responses for a submission
+**File: `backend/app/services/candidate_service.py`**
+Functions:
+- `create_candidate_with_responses()`: Create a candidate with questionnaire responses
+- `process_candidate_responses()`: Process raw responses into a candidate profile
 
-### `backend/app/models/compatibility.py`
-- `CompatibilityScore` class: Model storing compatibility analysis results
-- `CompatibilityDimension` class: Model for different compatibility dimensions
-- Relationships to candidates and teams
+**File: `backend/app/services/compatibility_service.py`**
+Functions:
+- `calculate_compatibility()`: Main function to calculate compatibility scores
+- `calculate_dimension_score()`: Calculate score for a specific dimension
+- `identify_strengths_and_challenges()`: Identify key strengths and challenges
+- `generate_compatibility_insights()`: Generate AI-powered insights
 
-## AI Services
+### 5. AI Components
 
-### `backend/app/services/ai/nlp_processor.py`
-- `process_text_response()`: Process text responses using NLP
-- `extract_keywords()`: Extract keywords from responses
-- `analyze_sentiment()`: Analyze sentiment in responses
-- `calculate_semantic_similarity()`: Calculate similarity between responses
+**File: `backend/app/ai/openai_client.py`**
+Functions:
+- `get_openai_client()`: Initialize and configure OpenAI client
+- `generate_text()`: Generate text using OpenAI API
 
-### `backend/app/services/ai/compatibility_analyzer.py`
-- `calculate_overall_compatibility()`: Calculate overall compatibility score
-- `analyze_work_style_compatibility()`: Analyze work style dimension
-- `analyze_communication_compatibility()`: Analyze communication dimension
-- `analyze_environment_compatibility()`: Analyze work environment compatibility
-- `generate_compatibility_insights()`: Generate natural language insights
+**File: `backend/app/ai/nlp_processor.py`**
+Functions:
+- `extract_personality_traits()`: Extract personality traits from text responses
+- `analyze_communication_style()`: Analyze communication preferences
+- `process_text_responses()`: Process text responses into structured data
 
-### `backend/app/services/ai/personality_analyzer.py`
-- `analyze_personality_traits()`: Analyze personality traits from responses
-- `predict_mbti_type()`: Predict MBTI personality type
-- `extract_work_preferences()`: Extract work preferences from personality
-- `identify_strengths_weaknesses()`: Identify potential strengths and challenges
+**File: `backend/app/ai/compatibility_analyzer.py`**
+Functions:
+- `calculate_team_profile()`: Generate team profile from member data
+- `calculate_candidate_profile()`: Generate candidate profile from responses
+- `calculate_compatibility()`: Compare profiles and generate compatibility scores
+- `generate_insights()`: Generate natural language insights about compatibility
 
-### `backend/app/services/ai/visualization_generator.py`
-- `generate_radar_chart_data()`: Generate data for radar charts
-- `generate_heatmap_data()`: Generate data for compatibility heatmaps
-- `generate_bar_chart_data()`: Generate data for bar charts
-- `format_data_for_power_bi()`: Format data for Power BI visualization
-- `format_data_for_google_charts()`: Format data for Google Charts
+## Frontend Structure & Functions
 
-## Service Layer
+### 1. API Clients
 
-### `backend/app/services/candidate_service.py`
-- `get_all_candidates()`: Get all candidates
-- `get_candidate_by_id()`: Get candidate by ID
-- `create_new_candidate()`: Create a new candidate
-- `update_candidate_info()`: Update candidate information
-- `delete_candidate_by_id()`: Delete a candidate
-
-### `backend/app/services/team_service.py`
-- `get_all_teams()`: Get all teams
-- `get_team_by_id()`: Get team by ID
-- `create_new_team()`: Create a new team
-- `update_team_info()`: Update team information
-- `delete_team_by_id()`: Delete a team
-- `get_team_members()`: Get members of a team
-- `add_member_to_team()`: Add a member to a team
-- `remove_member_from_team()`: Remove a member from a team
-
-### `backend/app/services/questionnaire_service.py`
-- `get_all_questionnaires()`: Get all questionnaires
-- `get_questionnaire_by_id()`: Get questionnaire by ID
-- `create_new_questionnaire()`: Create a new questionnaire
-- `update_questionnaire()`: Update a questionnaire
-- `delete_questionnaire()`: Delete a questionnaire
-- `submit_responses()`: Submit responses to a questionnaire
-- `get_responses_by_user()`: Get a user's responses to questionnaires
-
-# Frontend Functions
-
-## API Clients
-
-### `frontend/src/api/apiClient.js`
-- `request()`: Base API request function
-- `get()`, `post()`, `put()`, `delete()`: HTTP method wrappers
-- `handleResponse()`: Response handler with error processing
-- `setAuthToken()`: Set authentication token for requests
-
-### `frontend/src/api/candidateApi.js`
-- `getCandidates()`: Fetch all candidates
-- `getCandidate()`: Fetch a specific candidate
-- `createCandidate()`: Create a new candidate
-- `updateCandidate()`: Update a candidate
-- `deleteCandidate()`: Delete a candidate
-- `submitCandidateQuestionnaire()`: Submit questionnaire for a candidate
-
-### `frontend/src/api/teamApi.js`
+**File: `frontend/src/api/teamApi.js`**
+Functions:
 - `getTeams()`: Fetch all teams
-- `getTeam()`: Fetch a specific team
-- `createTeam()`: Create a new team
-- `updateTeam()`: Update a team
-- `deleteTeam()`: Delete a team
-- `getTeamMembers()`: Get members of a team
-- `addTeamMember()`: Add a member to a team
-- `removeTeamMember()`: Remove a member from a team
+- `getTeam(id)`: Fetch team by ID
+- `createTeam(data)`: Create a new team
+- `addTeamMember(teamId, data)`: Add member to team
 
-### `frontend/src/api/compatibilityApi.js`
-- `getCompatibilityScore()`: Get compatibility score between candidate and team
-- `getCompatibilityReport()`: Get detailed compatibility report
-- `getTopCandidates()`: Get top candidates sorted by compatibility
-- `getVisualizationData()`: Get data for compatibility visualizations
+**File: `frontend/src/api/candidateApi.js`**
+Functions:
+- `getCandidates()`: Fetch all candidates
+- `getCandidate(id)`: Fetch candidate by ID
+- `createCandidate(data)`: Create a new candidate
+- `submitCandidateResponses(id, data)`: Submit questionnaire responses
 
-## Context Providers
+**File: `frontend/src/api/compatibilityApi.js`**
+Functions:
+- `calculateCompatibility(teamId, candidateId)`: Request compatibility calculation
+- `getCompatibilityResult(id)`: Fetch a compatibility result
+- `getTeamCompatibilityResults(teamId)`: Fetch all results for a team
 
-### `frontend/src/context/AuthContext.jsx`
-- `AuthProvider` component: Provides authentication context
-- `useAuth()` hook: Custom hook for accessing auth context
-- `login()`, `logout()`, `register()`: Authentication functions
-- Authentication state management
+### 2. React Components
 
-### `frontend/src/context/AppContext.jsx`
-- `AppProvider` component: Provides application-wide state
-- `useAppContext()` hook: Custom hook for accessing app context
-- Application theme and preferences management
+**File: `frontend/src/components/forms/QuestionnaireForm.js`**
+Functions:
+- `handleChange(questionId, value)`: Update response value
+- `validateForm()`: Validate all responses are provided
+- `handleSubmit()`: Submit questionnaire data
 
-## Custom Hooks
+**File: `frontend/src/components/forms/TeamForm.js`**
+Functions:
+- `handleInputChange(field, value)`: Update team field
+- `addTeamMember()`: Add a new team member to the form
+- `handleSubmit()`: Submit team data
 
-### `frontend/src/hooks/useAuth.js`
-- `useAuth()`: Hook for authentication functionality
-- `login()`, `logout()`, `register()`: Auth methods
-- `isAuthenticated()`: Check authentication status
-- `getUser()`: Get current user information
+**File: `frontend/src/components/dashboard/CompatibilityChart.js`**
+Functions:
+- `renderRadarChart()`: Render radar chart of compatibility dimensions
+- `renderStrengthsAndChallenges()`: Display strengths and challenges
+- `renderAIInsights()`: Display AI-generated insights
 
-### `frontend/src/hooks/useQuestionnaire.js`
-- `useQuestionnaire()`: Hook for questionnaire functionality
-- `getQuestions()`: Get questionnaire questions
-- `submitResponses()`: Submit questionnaire responses
-- `validateResponses()`: Validate responses before submission
+**File: `frontend/src/components/dashboard/TeamInsights.js`**
+Functions:
+- `renderTeamProfile()`: Display team profile visualization
+- `renderTopCandidates()`: Display top compatible candidates
+- `renderTeamComposition()`: Visualize team composition
 
-### `frontend/src/hooks/useCompatibility.js`
-- `useCompatibility()`: Hook for compatibility analysis
-- `calculateCompatibility()`: Calculate compatibility between entities
-- `getCompatibilityInsights()`: Get AI-generated compatibility insights
-- `getVisualizationData()`: Get data formatted for visualizations
+### 3. Page Components
 
-## Page Components
+**File: `frontend/src/pages/Dashboard.js`**
+Functions:
+- `fetchTeamsData()`: Load teams data
+- `fetchCandidatesData()`: Load candidates data
+- `handleTeamSelect(teamId)`: Change selected team
+- `renderTeamOverview()`: Render team overview section
+- `renderCandidateList()`: Render candidate list section
 
-### `frontend/src/pages/DashboardPage.jsx`
-- `DashboardPage` component: Main dashboard view
-- `useEffect()` hooks for data fetching
-- State management for dashboard data
-- Layout and rendering of dashboard components
+**File: `frontend/src/pages/TeamSetup.js`**
+Functions:
+- `handleCreateTeam()`: Handle team creation
+- `handleAddMembers()`: Handle adding members
+- `handleTeamQuestionnaire()`: Handle team questionnaire
 
-### `frontend/src/pages/CandidateForm.jsx`
-- `CandidateForm` component: Form for candidate data
-- Form state management
-- `handleSubmit()`: Form submission handler
-- Validation and error handling
+**File: `frontend/src/pages/CandidateEntry.js`**
+Functions:
+- `handleCreateCandidate()`: Handle candidate creation
+- `handleCandidateQuestionnaire()`: Handle candidate questionnaire
+- `handleTeamSelection()`: Handle team selection for comparison
 
-### `frontend/src/pages/TeamSetupPage.jsx`
-- `TeamSetupPage` component: Team setup interface
-- Team creation and editing functionality
-- Team member management
-- `saveTeam()`: Save team configuration
+**File: `frontend/src/pages/Results.js`**
+Functions:
+- `fetchCompatibilityResult()`: Fetch compatibility result data
+- `renderCompatibilityChart()`: Render compatibility visualization
+- `renderCompatibilityDetails()`: Render detailed compatibility information
 
-### `frontend/src/pages/CompatibilityResultsPage.jsx`
-- `CompatibilityResultsPage` component: Results display
-- `useEffect()` for loading compatibility data
-- Rendering of charts and compatibility insights
-- Filtering and sorting functionality for results
+### 4. Custom Hooks
 
-## Dashboard Components
+**File: `frontend/src/hooks/useCompatibility.js`**
+Functions:
+- `calculateCompatibility(teamId, candidateId)`: Calculate compatibility
+- `getCompatibilityResult(resultId)`: Get result data
+- `getTeamCompatibility(teamId)`: Get team compatibility data
 
-### `frontend/src/components/dashboard/CompatibilityChart.jsx`
-- `CompatibilityChart` component: Visualization component
-- Chart creation and rendering
-- Data transformation for visualization
-- Interaction handlers for charts
+**File: `frontend/src/hooks/useForm.js`**
+Functions:
+- `handleChange(field, value)`: Handle form field changes
+- `setFormValues(values)`: Set multiple form values
+- `validateForm()`: Validate form fields
+- `resetForm()`: Reset form to initial state
 
-### `frontend/src/components/dashboard/CandidateCard.jsx`
-- `CandidateCard` component: Display candidate information
-- Compatibility score visualization
-- `expandDetails()`: Show/hide detailed information
-- Action handlers for candidate management
+**File: `frontend/src/hooks/useApi.js`**
+Functions:
+- `get(url)`: Make GET request
+- `post(url, data)`: Make POST request
+- `put(url, data)`: Make PUT request
+- `delete(url)`: Make DELETE request
 
-### `frontend/src/components/dashboard/TeamInsights.jsx`
-- `TeamInsights` component: Team insights display
-- Visualization of team characteristics
-- `renderInsightItem()`: Render individual insights
-- Filtering of insights by category
+## Key Integration Points
 
-### `frontend/src/components/dashboard/AIRecommendations.jsx`
-- `AIRecommendations` component: Display AI recommendations
-- Rendering of AI-generated insights
-- `prioritizeRecommendations()`: Sort recommendations by importance
-- UI for recommendation actions
+1. **Team Member Questionnaire → Team Profile**
+   - Team members answer questionnaire
+   - Responses stored in database
+   - AI processes responses into a team profile
+
+2. **Candidate Questionnaire → Candidate Profile**
+   - Candidate answers same questionnaire
+   - Responses stored in database
+   - AI processes responses into a candidate profile
+
+3. **Compatibility Calculation**
+   - Team profile and candidate profile compared
+   - Dimension scores calculated
+   - Strengths and challenges identified
+   - AI generates natural language insights
+
+4. **Results Visualization**
+   - Compatibility scores displayed in radar chart
+   - Strengths and challenges listed
+   - AI insights presented in dashboard
