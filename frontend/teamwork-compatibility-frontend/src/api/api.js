@@ -1,25 +1,14 @@
-// src/api/api.js
-import { mockTeam, mockCandidate, mockCompatibilityData, mockSummary } from '../mockData';
 import axios from 'axios';
-// Flag to toggle between mock data and real API calls
-const USE_MOCK_DATA = true;
 
-// Create API client with base URL (will be used when backend is ready)
+// Create API client with base URL
 const api = axios.create({
-  baseURL: 'http://localhost:8000/api/v1',
+  baseURL: 'http://localhost:8000/api/v1', // Adjust to your backend URL
 });
 
 // Get team information
 export const getTeam = async () => {
-  if (USE_MOCK_DATA) {
-    // Return mock data with a small delay to simulate network request
-    return new Promise(resolve => {
-      setTimeout(() => resolve(mockTeam), 500);
-    });
-  }
-  
   try {
-    const response = await api.get('/teams/1');
+    const response = await api.get('/teams/1'); // Assuming ID 1 for single team
     return response.data;
   } catch (error) {
     console.error('Error fetching team:', error);
@@ -29,14 +18,8 @@ export const getTeam = async () => {
 
 // Get candidate information
 export const getCandidate = async () => {
-  if (USE_MOCK_DATA) {
-    return new Promise(resolve => {
-      setTimeout(() => resolve(mockCandidate), 500);
-    });
-  }
-  
   try {
-    const response = await api.get('/candidates/1');
+    const response = await api.get('/candidates/1'); // Assuming ID one for single candidate
     return response.data;
   } catch (error) {
     console.error('Error fetching candidate:', error);
@@ -46,14 +29,8 @@ export const getCandidate = async () => {
 
 // Get compatibility score between team and candidate
 export const getCompatibilityScore = async () => {
-  if (USE_MOCK_DATA) {
-    return new Promise(resolve => {
-      setTimeout(() => resolve(mockCompatibilityData), 500);
-    });
-  }
-  
   try {
-    const response = await api.get('/compatibility/1');
+    const response = await api.get('/compatibility/1'); // Assuming ID 1 for compatibility result
     return response.data;
   } catch (error) {
     console.error('Error fetching compatibility score:', error);
@@ -63,12 +40,6 @@ export const getCompatibilityScore = async () => {
 
 // Get AI summary of compatibility
 export const getCompatibilitySummary = async () => {
-  if (USE_MOCK_DATA) {
-    return new Promise(resolve => {
-      setTimeout(() => resolve(mockSummary), 500);
-    });
-  }
-  
   try {
     const response = await api.get('/compatibility/1/summary');
     return response.data;
