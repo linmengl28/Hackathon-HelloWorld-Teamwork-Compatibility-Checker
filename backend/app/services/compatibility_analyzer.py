@@ -3,113 +3,101 @@ from app.db.questionnaire import questionnaire
 from app.db.candidate_response import candidate_response
 from app.db.team_response import team_response
 import json
+import os
 from dotenv import load_dotenv
 from openai import OpenAI
-import os
-from typing import List
 
 load_dotenv()
 
-# Format the full GPT prompt
-def format_prompt(questionnaire, candidate, all_teams):
+# Format prompt for one candidate & one team
+def format_prompt_for_pair(questionnaire, candidate, team):
     intro = """
-The following prompt contains important background instructions. Please follow them carefully.
-
 You are an expert in analyzing teamwork compatibility.
 
-Given:
-- A list of multiple-choice questionnaire questions, each mapped to a category.
-- Answers from a candidate.
-- Answers from multiple teams.
+Compare the answers of the following candidate and team across a multiple-choice questionnaire.
 
 Your task:
-1. Compare the candidate's answers with teams'.
-2. For each category, calculate a compatibility score (0–100).
-3. Generate an `overall_score` (average of categories).
-4. List key `strengths` and `challenges`.
-5. Return a clear summary.
+1. For each category (work_style, adaptability, etc.), calculate a score (0–100).
+2. Compute an overall_score.
+3. List key strengths and challenges.
+4. Summarize your findings clearly.
 
-Return a **list of JSON objects**, one per team, in the following format:
+Return only one JSON object with this format:
+
 {
-  "candidate_id": 1,
+  "candidate_id": 2,
   "team_id": 1,
-  "overall_score": 78.5,
+  "overall_score": 85.0,
   "dimension_scores": {
-    "work_style": 85,
-    "communication_style": 72,
-    ...
+    "work_style": 80,
+    "communication_style": 75,
+    "collaboration": 90,
+    "problem_solving": 88,
+    "adaptability": 82
   },
-  "strengths": [ "..." ],
-  "challenges": [ "..." ],
+  "strengths": ["...", "..."],
+  "challenges": ["...", "..."],
   "summary": "..."
 }
+""".strip()
 
----
+    prompt = f"Candidate ID: {candidate['candidate_id']}\nTeam ID: {team['team_id']}\n\n"
 
-Now, here is the data:
-"""
-
-    prompt = f"Candidate: {candidate['candidate_id']}\n\n"
     for q in questionnaire:
         qid = q["id"]
         prompt += f"Q{qid} ({q['category']}): {q['text']}\n"
         prompt += f"- Candidate: {candidate['answers'].get(qid, 'N/A')}\n"
-        for team in all_teams:
-            prompt += f"- Team {team['team_id']}: {team['answers'].get(qid, 'N/A')}\n"
-        prompt += "\n"
+        prompt += f"- Team: {team['answers'].get(qid, 'N/A')}\n\n"
 
-    return intro.strip() + "\n\n" + prompt.strip()
+    return intro + "\n\n" + prompt.strip()
 
 
-# GPT Call
-def call_ai(prompt: str) -> dict | list:
+# GPT call for candidate-team compatibility
+def call_ai(prompt: str) -> dict:
     client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
     response = client.chat.completions.create(
         model="gpt-4",
-        messages=[
-            {"role": "user", "content": prompt.strip()}
-        ],
+        messages=[{"role": "user", "content": prompt.strip()}],
         temperature=0.7
     )
 
     content = response.choices[0].message.content
-    print("GPT raw response:\n", content)
+    print("🧠 GPT raw response:\n", content)
+
+    # Remove anything before JSON block (if GPT adds text)
+    json_start = content.find("{")
+    json_text = content[json_start:]
 
     try:
-#         json_text = content[content.find("{"):]
-        return json.loads(content)
+        return json.loads(json_text)
     except json.JSONDecodeError as e:
         raise ValueError(f"GPT response was not valid JSON:\n{content}") from e
 
-# Main compatibility analysis function
-def calculate_compatibility_all_teams(candidate_id: int) -> List[CompatibilityResultResponse]:
 
+# Main function to calculate ONE match
+def calculate_compatibility(candidate_id: int, team_id: int) -> CompatibilityResultResponse:
     if candidate_id != candidate_response["candidate_id"]:
         raise ValueError("Candidate not found")
 
-    prompt = format_prompt(
+    team = next((t for t in team_response if t["team_id"] == team_id), None)
+    if not team:
+        raise ValueError("Team not found")
+
+    prompt = format_prompt_for_pair(
         questionnaire=questionnaire["questions"],
         candidate=candidate_response,
-        all_teams=team_response
+        team=team
     )
 
-    ai_results = call_ai(prompt)  # this will return a list of dicts
+    ai_result = call_ai(prompt)
 
-    responses = []
-    for result in ai_results:
-        response = CompatibilityResultResponse(
-            candidate_id=result["candidate_id"],
-            team_id=result["team_id"],
-            overall_score=result["overall_score"],
-            dimension_scores=result["dimension_scores"],
-            strengths=result["strengths"],
-            challenges=result["challenges"],
-            summary=result["summary"]
-        )
-
-        # Save to your in-memory store for now (later to DB)
-#         DUMMY_DB[(result["candidate_id"], result["team_id"])] = response
-#         responses.append(response)
-
-    return responses
+    return CompatibilityResultResponse(
+        candidate_id=ai_result["candidate_id"],
+        team_id=ai_result["team_id"],
+        overall_score=ai_result["overall_score"],
+        dimension_scores=ai_result["dimension_scores"],
+        strengths=ai_result["strengths"],
+        challenges=ai_result["challenges"],
+        summary=ai_result["summary"]
+    )
