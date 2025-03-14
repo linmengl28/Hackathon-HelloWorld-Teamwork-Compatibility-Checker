@@ -9,9 +9,9 @@ Backend Environment Setup (FastAPI)
 
 3. Configure the .env file:
    First, copy the example file:
-   cp .env.example .env
+   👉cp .env.example .env
    Then open .env and insert your real OpenAI API key:
-   OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+   👉OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
    ⚠️ Do not share this .env file or commit it to Git. Keep your key safe!
 
 4. Run the FastAPI backend server:

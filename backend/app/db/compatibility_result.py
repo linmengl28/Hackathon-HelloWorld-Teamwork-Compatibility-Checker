@@ -15,12 +15,4 @@ compatibility_results = [
         "summary": "Strong alignment with team communication patterns."
     }
 ]
-#     {
-#         "candidate_id": 2,
-#         "team_id": 1,
-#         "compatibility_score": 0.65,
-#         "strengths": "Strong problem-solving mindset.",
-#         "challenges": "Misalignment in communication style.",
-#         "ai_insights": "Needs adaptation for team dynamics."
-#     }
 
