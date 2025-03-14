@@ -1,0 +1,12 @@
+{
+  "project_name": "MyProject",
+  "version": "1.0.0",
+  "author": "Your Name",
+  "settings": {
+    "debug": true,
+    "port": 8000
+  }
+}
+
+
+
