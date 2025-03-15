@@ -5,9 +5,7 @@ import { Link as RouterLink, useLocation } from 'react-router-dom';
 const Header = () => {
   const location = useLocation();
   const isDashboardActive = location.pathname === '/';
-  const isQuestionnaireActive = location.pathname === '/questionnaire';
   
- 
   const activeBg = useColorModeValue('blue.700', 'blue.700');
   const hoverBg = useColorModeValue('blue.500', 'blue.500');
   
@@ -17,9 +15,9 @@ const Header = () => {
         <Heading size="md">Teamwork Compatibility Checker</Heading>
         <Spacer />
         <HStack spacing={3}>
-          <Button 
-            as={RouterLink} 
-            to="/" 
+          <Button
+            as={RouterLink}
+            to="/"
             bg={isDashboardActive ? activeBg : 'transparent'}
             color="white"
             _hover={{ bg: hoverBg }}
@@ -32,20 +30,23 @@ const Header = () => {
           >
             Dashboard
           </Button>
-          <Button 
-            as={RouterLink} 
-            to="/questionnaire?preview=true" 
-            bg={isQuestionnaireActive ? activeBg : 'transparent'}
+          
+          {/* External link to the standalone questionnaire */}
+          <Button
+            as="a"
+            href="/questionnaire"
+            target="_blank" 
+            rel="noopener noreferrer"
+            bg="transparent"
             color="white"
             _hover={{ bg: hoverBg }}
             borderRadius="md"
-            fontWeight={isQuestionnaireActive ? "bold" : "normal"}
+            fontWeight="normal"
             px={4}
             py={2}
-            shadow={isQuestionnaireActive ? "md" : "none"}
             leftIcon={<span role="img" aria-label="questionnaire">📋</span>}
           >
-            Questionnaire Preview
+            Candidate Questionnaire
           </Button>
         </HStack>
       </Flex>
