@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import {
   Heading,
   SimpleGrid,
@@ -29,10 +30,10 @@ const ANIMATION_DELAYS = {
   summary: 1.0
 };
 
-
 const CARD_HEIGHT = "450px";
 
 const Dashboard = () => {
+  const { teamId, candidateId } = useParams();
   const [team, setTeam] = useState(null);
   const [candidate, setCandidate] = useState(null);
   const [compatibilityData, setCompatibilityData] = useState(null);
@@ -64,12 +65,16 @@ const Dashboard = () => {
       try {
         setLoading(true);
         
-        // Fetch all data in parallel
+        // Parse IDs, defaulting to 1 if not provided (for backward compatibility)
+        const parsedTeamId = teamId ? parseInt(teamId) : 1;
+        const parsedCandidateId = candidateId ? parseInt(candidateId) : 1;
+        
+        // Fetch all data in parallel, using the IDs from the URL
         const [teamData, candidateData, compatibilityData, summaryData] = await Promise.all([
-          getTeam(),
-          getCandidate(),
-          getCompatibilityScore(),
-          getCompatibilitySummary()
+          getTeam(parsedTeamId),
+          getCandidate(parsedCandidateId),
+          getCompatibilityScore(parsedTeamId, parsedCandidateId),
+          getCompatibilitySummary(parsedTeamId, parsedCandidateId)
         ]);
         
         setTeam(teamData);
@@ -98,7 +103,7 @@ const Dashboard = () => {
     };
 
     fetchData();
-  }, []);
+  }, [teamId, candidateId]);
 
   if (loading) {
     return (
@@ -149,7 +154,6 @@ const Dashboard = () => {
   };
 
   const fitCategory = getOverallFitCategory();
-
 
   const cardStyle = {
     borderWidth: "1px",

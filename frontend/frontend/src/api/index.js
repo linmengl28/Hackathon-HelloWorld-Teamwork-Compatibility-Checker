@@ -10,7 +10,7 @@ const api = axios.create({
 });
 
 // Get team information
-export const getTeam = async () => {
+export const getTeam = async (teamId = 1) => {
   if (USE_MOCK_DATA) {
     return new Promise(resolve => {
       setTimeout(() => resolve(mockTeam), 500);
@@ -18,7 +18,7 @@ export const getTeam = async () => {
   }
   
   try {
-    const response = await api.get('/teams/1');
+    const response = await api.get(`/team/${teamId}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching team:', error);
@@ -26,8 +26,46 @@ export const getTeam = async () => {
   }
 };
 
+// Get all teams (for team selection)
+export const getAllTeams = async () => {
+  if (USE_MOCK_DATA) {
+    // Create multiple mock teams for selection
+    return new Promise(resolve => {
+      setTimeout(() => resolve([
+        mockTeam,
+        {
+          id: 2,
+          name: "Marketing",
+          department: "Marketing",
+          members: [
+            { id: 3, name: "Sarah Wilson", role: "Marketing Manager" },
+            { id: 4, name: "Mike Johnson", role: "Content Strategist" },
+          ]
+        },
+        {
+          id: 3,
+          name: "Customer Support",
+          department: "Operations",
+          members: [
+            { id: 5, name: "Emma Davis", role: "Support Lead" },
+            { id: 6, name: "James Miller", role: "Support Specialist" },
+          ]
+        }
+      ]), 500);
+    });
+  }
+  
+  try {
+    const response = await api.get('/teams');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching all teams:', error);
+    throw error;
+  }
+};
+
 // Get candidate information
-export const getCandidate = async () => {
+export const getCandidate = async (candidateId = 1) => {
   if (USE_MOCK_DATA) {
     return new Promise(resolve => {
       setTimeout(() => resolve(mockCandidate), 500);
@@ -35,7 +73,7 @@ export const getCandidate = async () => {
   }
   
   try {
-    const response = await api.get('/candidates/1');
+    const response = await api.get(`/candidate/${candidateId}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching candidate:', error);
@@ -43,8 +81,42 @@ export const getCandidate = async () => {
   }
 };
 
+// Get all candidates (for candidate selection)
+export const getAllCandidates = async () => {
+  if (USE_MOCK_DATA) {
+    // Create multiple mock candidates for selection
+    return new Promise(resolve => {
+      setTimeout(() => resolve([
+        mockCandidate,
+        {
+          id: 2,
+          name: "Sam Thompson",
+          position: "Backend Developer",
+          email: "sam.t@example.com",
+          skills: ["Python", "FastAPI", "Database Design"]
+        },
+        {
+          id: 3,
+          name: "Jamie Wilson",
+          position: "Full Stack Developer",
+          email: "jamie.w@example.com",
+          skills: ["JavaScript", "Node.js", "MongoDB", "React"]
+        }
+      ]), 500);
+    });
+  }
+  
+  try {
+    const response = await api.get('/candidates');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching all candidates:', error);
+    throw error;
+  }
+};
+
 // Get compatibility score between team and candidate
-export const getCompatibilityScore = async () => {
+export const getCompatibilityScore = async (teamId = 1, candidateId = 1) => {
   if (USE_MOCK_DATA) {
     return new Promise(resolve => {
       setTimeout(() => resolve(mockCompatibilityData), 500);
@@ -52,7 +124,7 @@ export const getCompatibilityScore = async () => {
   }
   
   try {
-    const response = await api.get('/compatibility/1');
+    const response = await api.get(`/compatibility/${candidateId}/${teamId}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching compatibility score:', error);
@@ -61,7 +133,7 @@ export const getCompatibilityScore = async () => {
 };
 
 // Get AI summary of compatibility
-export const getCompatibilitySummary = async () => {
+export const getCompatibilitySummary = async (teamId = 1, candidateId = 1) => {
   if (USE_MOCK_DATA) {
     return new Promise(resolve => {
       setTimeout(() => resolve(mockSummary), 500);
@@ -69,7 +141,7 @@ export const getCompatibilitySummary = async () => {
   }
   
   try {
-    const response = await api.get('/compatibility/1/summary');
+    const response = await api.get(`/compatibility/${candidateId}/${teamId}/summary`);
     return response.data;
   } catch (error) {
     console.error('Error fetching compatibility summary:', error);

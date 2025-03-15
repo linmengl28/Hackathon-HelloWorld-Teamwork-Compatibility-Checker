@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import MainLayout from './components/layout/MainLayout';
 import Dashboard from './pages/Dashboard';
 import Questionnaire from './pages/Questionnaire';
+import TeamSelection from './pages/TeamSelection';
+import CandidateSelection from './pages/CandidateSelection';
 
 function App() {
   return (
@@ -10,13 +12,11 @@ function App() {
       <Router>
         <MainLayout>
           <Routes>
-            <Route path="/" element={<Dashboard />} />
-   
-            <Route 
-              path="/questionnaire" 
-              element={<Questionnaire />} 
-            />
-
+            <Route path="/" element={<Navigate to="/team-selection" replace />} />
+            <Route path="/team-selection" element={<TeamSelection />} />
+            <Route path="/candidate-selection/:teamId" element={<CandidateSelection />} />
+            <Route path="/dashboard/:teamId/:candidateId" element={<Dashboard />} />
+            <Route path="/questionnaire" element={<Questionnaire />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </MainLayout>
