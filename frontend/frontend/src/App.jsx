@@ -5,7 +5,6 @@ import Dashboard from './pages/Dashboard';
 import CandidateQuestionnaire from './pages/CandidateQuestionnaire';
 import TeamSelection from './pages/TeamSelection';
 import CandidateSelection from './pages/CandidateSelection';
-import Questionnaire from './pages/Questionnaire';
 
 function App() {
   return (
@@ -53,7 +52,7 @@ function App() {
           
           {/* Standalone questionnaire pages */}
           <Route path="/questionnaire" element={<CandidateQuestionnaire />} />
-          <Route path="/questionnaire/preview" element={<Questionnaire />} />
+
           
           {/* Redirect any unknown routes to home */}
           <Route path="*" element={<Navigate to="/" replace />} />
