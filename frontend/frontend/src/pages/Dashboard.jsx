@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
 import {
   Heading,
   SimpleGrid,
@@ -10,7 +11,12 @@ import {
   useColorModeValue,
   SlideFade,
   Divider,
-  Badge
+  Badge,
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  Icon,
+  Button
 } from '@chakra-ui/react';
 
 import CandidateInfo from '../components/dashboard/CandidateInfo';
@@ -19,6 +25,24 @@ import CompatibilityChart from '../components/dashboard/CompatibilityChart';
 import CompatibilitySummary from '../components/dashboard/CompatibilitySummary';
 
 import { getTeam, getCandidate, getCompatibilityScore, getCompatibilitySummary } from '../api';
+
+// ChevronRight icon component
+const ChevronRightIcon = (props) => (
+  <svg
+    stroke="currentColor"
+    fill="none"
+    strokeWidth="2"
+    viewBox="0 0 24 24"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    height="1em"
+    width="1em"
+    xmlns="http://www.w3.org/2000/svg"
+    {...props}
+  >
+    <polyline points="9 18 15 12 9 6"></polyline>
+  </svg>
+);
 
 // Animation delays for staggered appearance
 const ANIMATION_DELAYS = {
@@ -29,10 +53,10 @@ const ANIMATION_DELAYS = {
   summary: 1.0
 };
 
-
 const CARD_HEIGHT = "450px";
 
 const Dashboard = () => {
+  const { teamId, candidateId } = useParams();
   const [team, setTeam] = useState(null);
   const [candidate, setCandidate] = useState(null);
   const [compatibilityData, setCompatibilityData] = useState(null);
@@ -58,18 +82,23 @@ const Dashboard = () => {
   const headingColor = useColorModeValue('blue.700', 'blue.300');
   const cardBg = useColorModeValue('white', 'gray.800');
   const borderColor = useColorModeValue('gray.200', 'gray.700');
+  const breadcrumbColor = useColorModeValue('gray.500', 'gray.400');
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
         
-        // Fetch all data in parallel
+        // Parse IDs, defaulting to 1 if not provided (for backward compatibility)
+        const parsedTeamId = teamId ? parseInt(teamId) : 1;
+        const parsedCandidateId = candidateId ? parseInt(candidateId) : 1;
+        
+        // Fetch all data in parallel, using the IDs from the URL
         const [teamData, candidateData, compatibilityData, summaryData] = await Promise.all([
-          getTeam(),
-          getCandidate(),
-          getCompatibilityScore(),
-          getCompatibilitySummary()
+          getTeam(parsedTeamId),
+          getCandidate(parsedCandidateId),
+          getCompatibilityScore(parsedTeamId, parsedCandidateId),
+          getCompatibilitySummary(parsedTeamId, parsedCandidateId)
         ]);
         
         setTeam(teamData);
@@ -98,7 +127,7 @@ const Dashboard = () => {
     };
 
     fetchData();
-  }, []);
+  }, [teamId, candidateId]);
 
   if (loading) {
     return (
@@ -150,7 +179,6 @@ const Dashboard = () => {
 
   const fitCategory = getOverallFitCategory();
 
-
   const cardStyle = {
     borderWidth: "1px",
     borderRadius: "lg",
@@ -174,6 +202,34 @@ const Dashboard = () => {
       bgGradient={bgGradient}
       transition="background 0.3s ease"
     >
+      {/* Breadcrumbs navigation */}
+      {teamId && candidateId && (
+        <Breadcrumb 
+          separator={<Icon as={ChevronRightIcon} color={breadcrumbColor} />} 
+          mb={6}
+        >
+          <BreadcrumbItem>
+            <BreadcrumbLink as={Link} to="/" color={breadcrumbColor}>
+              Team Selection
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbItem>
+            <BreadcrumbLink 
+              as={Link} 
+              to={`/candidate-selection/${teamId}`} 
+              color={breadcrumbColor}
+            >
+              Candidate Selection
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbItem isCurrentPage>
+            <BreadcrumbLink color={headingColor} fontWeight="semibold">
+              Compatibility Dashboard
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+        </Breadcrumb>
+      )}
+      
       <SlideFade in={showElements.title} offsetY="-20px">
         <Flex direction="column" align="center" mb={8}>
           <Heading 
@@ -243,6 +299,28 @@ const Dashboard = () => {
           </Box>
         </SlideFade>
       </SimpleGrid>
+      
+      {/* Back to selection buttons */}
+      <Flex justifyContent="center" mt={8}>
+        <Button
+          as={Link}
+          to="/"
+          colorScheme="gray"
+          mr={4}
+        >
+          Select Different Team
+        </Button>
+        
+        {teamId && (
+          <Button
+            as={Link}
+            to={`/candidate-selection/${teamId}`}
+            colorScheme="blue"
+          >
+            Select Different Candidate
+          </Button>
+        )}
+      </Flex>
     </Box>
   );
 };
