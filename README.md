@@ -8,8 +8,9 @@
 5. [Implementation](#5-implementation)
 6. [Setup](#6-setup)
 7. [Usage](#7-usage)
-8. [Connect](#8-connect)
-9. [License](#9-license)
+8. [Demo](#8-demo)
+9. [Connect](#8-connect)
+10. [License](#9-license)
 
 ## 1. Project Overview
 Hiring the right candidate is not just about technical skills—it’s about ensuring a good teamwork fit. Our AI-powered **Teamwork Compatibility Checker** helps HR teams and hiring managers match candidates with existing teams based on work styles, communication preferences, and cultural fit.
@@ -114,15 +115,28 @@ Our system leverages AI to:
   - uvicorn app.main:app --reload
   - 👉 By default, your API documentation will be available at:
         http://localhost:8000/docs
+## 8. Demo
 
-## 8. Connect
+### Dashboard Result Example
+
+Below are some screenshots demonstrating the results from the dashboard:
+
+#### Screenshot 1:
+![Screenshot 2025-03-16 140701](https://github.com/user-attachments/assets/267609a4-0c32-45e2-9508-934f9633504c)
+
+#### Screenshot 2:
+![Screenshot 2025-03-16 140732](https://github.com/user-attachments/assets/ac4306d2-d5df-43e6-a579-4384e6a8abad)
+
+These screenshots show the various aspects of the dashboard and how the data is visualized.
+
+## 9. Connect
 - Bowang Lin: ​​bowanglin@gmail.com
 - Di Mu: https://www.linkedin.com/in/di-mu/
 - Jingjing Ji: http://linkedin.com/in/jingjingji
 - Menglin Lin: https://www.linkedin.com/in/menglin-lin-47a1b8191
 - Shuna Jiang: https://www.linkedin.com/in/shuna-jiang/
 
-## 9. License
+## 10. License
 This project is licensed under the MIT License.  
 ![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)  
 See the [LICENSE](LICENSE) file for details.
