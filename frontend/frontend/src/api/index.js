@@ -15,14 +15,14 @@ const mockCandidates = [
 ];
 
 // Flag to toggle between mock data and real API calls
-const USE_MOCK_DATA = true;
+const USE_MOCK_DATA = false;
 
 // Create API client with base URL
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1',
 });
 
-// Get all teams
+//get all teams
 export const getAllTeams = async () => {
   if (USE_MOCK_DATA) {
     return new Promise(resolve => {
@@ -31,14 +31,36 @@ export const getAllTeams = async () => {
   }
   
   try {
-    // Assuming you have a known range of team IDs 1-3
-    const teamIds = [1, 2, 3];
-    const promises = teamIds.map(id => api.get(`/team/${id}`).then(res => res.data));
-    const teams = await Promise.all(promises.map(p => p.catch(e => null)));
-    return teams.filter(team => team !== null);
+    // Get the response from the API
+    const response = await api.get('/teams');
+    console.log('Full API response:', response);
+    console.log('Teams raw data:', response.data);
+    
+    // Check if it's an array
+    if (Array.isArray(response.data)) {
+      const processedTeams = response.data.map(team => {
+        console.log('Processing team:', team);
+        // Return a properly formatted team object
+        return {
+          id: team.id,
+          name: team.name,
+          department: team.department || 'Not specified',
+          description: team.description || '',
+          // Make sure members is an array
+          members: Array.isArray(team.members) ? team.members : []
+        };
+      });
+      console.log('Processed teams:', processedTeams);
+      return processedTeams;
+    } 
+    
+    // If not an array, log the error and return an empty array
+    console.error('Expected array from /teams endpoint but got:', typeof response.data);
+    return [];
   } catch (error) {
     console.error('Error fetching teams:', error);
-    throw error;
+    // Fall back to mockTeams to keep the app working
+    return mockTeams;
   }
 };
 
@@ -51,11 +73,21 @@ export const getAllCandidates = async () => {
   }
   
   try {
-    // Assuming you have a known range of candidate IDs 1-3
-    const candidateIds = [1, 2, 3];
-    const promises = candidateIds.map(id => api.get(`/candidate/${id}`).then(res => res.data));
-    const candidates = await Promise.all(promises.map(p => p.catch(e => null)));
-    return candidates.filter(candidate => candidate !== null);
+    // Updated to use the /candidates endpoint from your backend
+    const response = await api.get('/candidates');
+    
+    // Transform the response to match what frontend expects
+    // Backend candidates only have id, name, email - we need to add position and skills
+    const candidates = response.data.map(candidate => ({
+      id: candidate.id,
+      name: candidate.name,
+      email: candidate.email,
+      // Add default values for fields not provided by backend
+      position: candidate.position || 'Not specified',
+      skills: candidate.skills || []
+    }));
+    
+    return candidates;
   } catch (error) {
     console.error('Error fetching candidates:', error);
     throw error;
@@ -72,8 +104,21 @@ export const getTeam = async (teamId = 1) => {
   }
   
   try {
+    // This matches your backend /team/{team_id} endpoint
     const response = await api.get(`/team/${teamId}`);
-    return response.data;
+    
+    // Transform the response if needed to match frontend expectations
+    const team = {
+      id: response.data.id,
+      name: response.data.name,
+      department: response.data.department,
+      // Your backend includes description which frontend might not use
+      description: response.data.description,
+      // Make sure members has the expected structure
+      members: response.data.members
+    };
+    
+    return team;
   } catch (error) {
     console.error(`Error fetching team ${teamId}:`, error);
     throw error;
@@ -90,8 +135,20 @@ export const getCandidate = async (candidateId = 1) => {
   }
   
   try {
+    // This matches your backend /candidate/{candidate_id} endpoint
     const response = await api.get(`/candidate/${candidateId}`);
-    return response.data;
+    
+    // Transform the response to add missing fields if needed
+    const candidate = {
+      id: response.data.id,
+      name: response.data.name,
+      email: response.data.email,
+      // Add default values for fields not provided by backend
+      position: response.data.position || 'Not specified',
+      skills: response.data.skills || []
+    };
+    
+    return candidate;
   } catch (error) {
     console.error(`Error fetching candidate ${candidateId}:`, error);
     throw error;
@@ -122,6 +179,7 @@ export const getCompatibilityScore = async (teamId = 1, candidateId = 1) => {
   }
   
   try {
+    // This matches your backend /compatibility/{candidate_id}/{team_id} endpoint
     const response = await api.get(`/compatibility/${candidateId}/${teamId}`);
     return response.data;
   } catch (error) {
@@ -139,15 +197,16 @@ export const getCompatibilitySummary = async (teamId = 1, candidateId = 1) => {
   }
   
   try {
-    // Try to extract summary from compatibility data
+    // Get compatibility data which contains the summary
     const compatibilityData = await getCompatibilityScore(teamId, candidateId);
+    
+    // Extract the summary from the compatibility data
     if (compatibilityData.summary) {
       return { insights: compatibilityData.summary };
     }
     
-    // If no summary in compatibility data, try dedicated summary endpoint
-    const response = await api.get(`/compatibility/${candidateId}/${teamId}/summary`);
-    return response.data;
+    // Fallback value if no summary is provided
+    return { insights: "No detailed insights available for this candidate and team combination." };
   } catch (error) {
     console.error(`Error fetching compatibility summary for team ${teamId}, candidate ${candidateId}:`, error);
     throw error;
