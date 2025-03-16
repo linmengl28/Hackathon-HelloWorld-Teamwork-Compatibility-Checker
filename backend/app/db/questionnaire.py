@@ -26,41 +26,41 @@ questionnaire = {
             "category": "problem_solving",
             "options": ["Break it down", "Brainstorm ideas", "Seek help"]
         },
-        {
-            "id": 5,
-            "text": "In team projects, what role do you often take?",
-            "category": "collaboration",
-            "options": ["Leader", "Supporter", "Idea generator"]
-        },
-        {
-            "id": 6,
-            "text": "How comfortable are you working with ambiguity?",
-            "category": "adaptability",
-            "options": ["Very comfortable", "Somewhat", "Not at all"]
-        },
-        {
-            "id": 7,
-            "text": "How often do you share updates with your team?",
-            "category": "communication",
-            "options": ["Frequently", "When needed", "Rarely"]
-        },
-        {
-            "id": 8,
-            "text": "What motivates you most in a team setting?",
-            "category": "collaboration",
-            "options": ["Recognition", "Impact", "Team spirit"]
-        },
-        {
-            "id": 9,
-            "text": "How do you prioritize tasks?",
-            "category": "work_style",
-            "options": ["By deadlines", "By impact", "Intuitively"]
-        },
-        {
-            "id": 10,
-            "text": "What do you do when you're stuck on a task?",
-            "category": "problem_solving",
-            "options": ["Troubleshoot alone", "Ask for help", "Take a break"]
-        }
+        # {
+        #     "id": 5,
+        #     "text": "In team projects, what role do you often take?",
+        #     "category": "collaboration",
+        #     "options": ["Leader", "Supporter", "Idea generator"]
+        # },
+        # {
+        #     "id": 6,
+        #     "text": "How comfortable are you working with ambiguity?",
+        #     "category": "adaptability",
+        #     "options": ["Very comfortable", "Somewhat", "Not at all"]
+        # },
+        # {
+        #     "id": 7,
+        #     "text": "How often do you share updates with your team?",
+        #     "category": "communication",
+        #     "options": ["Frequently", "When needed", "Rarely"]
+        # },
+        # {
+        #     "id": 8,
+        #     "text": "What motivates you most in a team setting?",
+        #     "category": "collaboration",
+        #     "options": ["Recognition", "Impact", "Team spirit"]
+        # },
+        # {
+        #     "id": 9,
+        #     "text": "How do you prioritize tasks?",
+        #     "category": "work_style",
+        #     "options": ["By deadlines", "By impact", "Intuitively"]
+        # },
+        # {
+        #     "id": 10,
+        #     "text": "What do you do when you're stuck on a task?",
+        #     "category": "problem_solving",
+        #     "options": ["Troubleshoot alone", "Ask for help", "Take a break"]
+        # }
     ]
 }
