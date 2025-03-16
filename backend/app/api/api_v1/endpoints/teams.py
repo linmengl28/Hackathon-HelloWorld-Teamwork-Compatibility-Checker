@@ -1,11 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException
-# from sqlalchemy.orm import Session 
+# from sqlalchemy.orm import Session
 # from backend.app.db.database import get_db
 from app.models.team import Team
 from app.schemas.team import TeamCreate, TeamResponse
 from app.db.team import teamDB
-
+from typing import Dict, List
 router = APIRouter()
+
 
 @router.post("/team", response_model=TeamResponse)
 def create_team(team: TeamCreate):
@@ -16,10 +17,11 @@ def create_team(team: TeamCreate):
         "name": team.name,
         "department": team.department,
         "description": team.description,
-        "members": team.members 
+        "members": team.members
     }
     teamDB.append(new_team)  # Store the team in the fake database
     return new_team
+
 
 @router.get("/team/{team_id}", response_model=TeamResponse)
 def get_team(team_id: int):
@@ -30,6 +32,14 @@ def get_team(team_id: int):
     return team
 
 
+@router.get("/teams", response_model=List[TeamResponse])
+def get_all_teams():
+    """
+    Get all teams
+    """
+    # Return all teams from the database
+    print("teamDB content:", teamDB)
+    return teamDB
 # @router.post("/team", response_model=TeamResponse)
 # def create_team(team: TeamCreate, db: Session = Depends(get_db)):
 #     new_team = Team(name=team.name, description=team.description)

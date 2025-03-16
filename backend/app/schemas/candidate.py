@@ -1,18 +1,20 @@
 from pydantic import BaseModel
 from typing import List, Optional
 
-class CandidateBase(BaseModel): # do not add id
+
+class CandidateBase(BaseModel):
     name: str
     email: str
-    # experience: int
-    # skills: List[str]
-    # preferred_work_style: str
+    position: Optional[str] = "Candidate"  # Add a position field with default
+    skills: List[str] = []  # Add skills field with default empty list
+
 
 class CandidateCreate(CandidateBase):
     pass  # No extra fields needed when creating a candidate
+
 
 class CandidateResponse(CandidateBase):
     id: int
 
     class Config:
-        orm_mode = True
+        orm_mode = True  # Change to from_attributes=True for newer Pydantic versions
