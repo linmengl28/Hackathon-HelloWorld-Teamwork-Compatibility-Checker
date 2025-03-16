@@ -1,6 +1,6 @@
 candidate_response = {
     "candidate_id": 2,
-    "name": "Alice",
+    "name": "Bob Smith",
     "answers": {
         1: "Flexible outline",
         2: "Accept and adjust",
