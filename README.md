@@ -1,4 +1,15 @@
 # AI-Powered Teamwork Compatibility Checker
+## Table of Contents
+
+1. [Project Overview](#1-project-overview)
+2. [How It Works](#2-how-it-works)
+3. [Target Users](#3-target-users)
+4. [Key Features](#4-key-features)
+5. [Implementation](#5-implementation)
+6. [Setup](#6-setup)
+7. [Usage](#7-usage)
+8. [Connect](#8-connect)
+9. [License](#9-license)
 
 ## 1. Project Overview
 Hiring the right candidate is not just about technical skills—it’s about ensuring a good teamwork fit. Our AI-powered **Teamwork Compatibility Checker** helps HR teams and hiring managers match candidates with existing teams based on work styles, communication preferences, and cultural fit.
@@ -43,52 +54,80 @@ Our system leverages AI to:
   - Potential risks & AI recommendations
   - Graphical representations of compatibility
 
-## 5. Technology Stack & APIs
-### 5.1 AI & NLP Processing
-- OpenAI GPT-4: Extracts work style themes from responses.
-- Azure AI Text Analytics: Sentiment analysis & keyword extraction.
-- Hugging Face Transformers (BERT-based): Measures semantic similarity.
+## 5. Implementation
+### Hardware
+- Machine: Dell Latitude 7455
+- Chip: Snadragon X Elite
+- OS: Windows 11 Pro
+- Memory: 32 GB
 
-### 5.2 Personality Analysis APIs
-- IBM Watson Personality Insights (optional).
-- MBTI API (if available).
+### Software
+- Python Version: 3.11.0
+- AnythingLLM LLM Provider: Qualcomm QNN
+- AnythingLLM Chat Model: Llama 3.2 3B Chat 8K
 
-### 5.3 Data Storage & Backend
-- SQL/NoSQL Database for structured data storage.
-- FastAPI (Backend) for API requests & ML processing.
-- React.js (Frontend) for an interactive UI.
+## 6. Setup
+### 6.1 Model
+- Install and setup AnythingLLM.
+  - Choose Qualcomm QNN as the LLM provider to target the NPU
+  - Choose the model of Llama 3.2 3B Chat with 8K context
+- Create a workspace by clicking "+ New Workspace"
+- Generate an API key
+  - Click the settings button on the bottom of the left panel
+  - Open the "Tools" dropdown
+  - Click "Developer API"
+  - Click "Generate New API Key"
 
-### 5.4 Visualization & Deployment
-- Microsoft Power BI API & Google Charts API for dashboards.
-- Deployment: Azure App Services / Heroku.
+### 6.2 Backend
+- Clone the repo
+  - https://github.com/linmengl28/Hackathon-HelloWorld-Teamwork-Compatibility-Checker.git
 
-## 6. User Interface & Workflow
-### 6.1 Candidate & Team Member Data Collection
-- Candidates complete a questionnaire.
-- Team members submit their own responses.
-- AI processes and stores all data for analysis.
+- Navigate to the `backend/` directory 
+  - cd backend
+    
+- Create a virtual environment:
+  - python3 -m venv venv
 
-### 6.2 Compatibility Dashboard (HR & Hiring Manager View)
-- Displays compatibility scores.
-- Provides AI-generated insights on collaboration potential.
-- Offers interactive visualizations & summaries.
+- Activate the virtual environment
+  - max/linux: source venv/bin/activate
+  - windows: venv\Scripts\activate
+    
+- Install the requirements
+  - pip install -r requirements.txt
 
-## 7. Development Roadmap (2-Day Hackathon Plan)
-### Day 1 - Backend Development
-- Set up FastAPI server.
-- Implement questionnaire data storage.
-- Integrate GPT-4 / BERT for NLP analysis.
-- Develop compatibility scoring algorithm.
-- Test API endpoints with sample inputs.
+- Create your.env file with the following variables
+  - api_key: "your-key-here"
+  - model_server_base_url: "http://localhost:3001/api/v1"
+  - workspace_slug: "your-slug-here"
 
-### Day 2 - Frontend & Deployment
-- Develop React.js frontend for questionnaire input.
-- Integrate Power BI / Google Charts for visualization.
-- Connect frontend with FastAPI backend.
-- Deploy prototype using Azure App Services / Heroku.
-- Conduct final testing & debugging.
+- Test the model server auth to verify the API key
+  - python src/auth.py
 
-## 8. Expected Impact
-- **Reduced Hiring Mismatches**: AI-backed insights improve team harmony.
-- **Efficient Decision-Making**: Faster assessment of cultural fit during hiring.
-- **Scalability**: Can be extended to internal promotions & role realignment.
+- Run the FastAPI backend server:
+  - uvicorn app.main:app --reload
+
+## 7. Usage
+- Run the frontend
+  - npm run dev
+
+- Run the FastAPI backend server: 
+  - uvicorn app.main:app --reload
+  - 👉 By default, your API documentation will be available at:
+        http://localhost:8000/docs
+
+## 8. Connect
+- Bowang Lin: ​​bowanglin@gmail.com
+- Di Mu: https://www.linkedin.com/in/di-mu/
+- Jingjing Ji: http://linkedin.com/in/jingjingji
+- Menglin Lin: https://www.linkedin.com/in/menglin-lin-47a1b8191
+- Shuna Jiang: https://www.linkedin.com/in/shuna-jiang/
+
+## 9. License
+This project is licensed under the MIT License.  
+![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)  
+See the [LICENSE](LICENSE) file for details.
+
+
+
+
+
