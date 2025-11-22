@@ -10,16 +10,18 @@ stages:
 install:
   - stage: install
   - image: "python:3.12"
-  - workingDirectory: "/workspace/backend"
+  - workingDirectory: "/workspace"
   - script:
+    - cd backend
     - pip install -r requirements.txt
 
 # Run tests
 test:
   - stage: test
   - image: "python:3.12"
-  - workingDirectory: "/workspace/backend"
+  - workingDirectory: "/workspace"
   - script:
+    - cd backend
     - pip install -r requirements.txt
     - python test_ai.py || echo "Tests completed"
 
