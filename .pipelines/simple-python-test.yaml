@@ -16,8 +16,7 @@ install:
     - pip install -r requirements.txt
   - artifacts:
     - backend/requirements.txt
-    - backend/*.txt
-    - backend/
+    # 只收集 requirements.txt，不收集整个目录
 
 # Run tests
 test:
@@ -31,6 +30,5 @@ test:
   - artifacts:
     - backend/requirements.txt
     - backend/test_ai.py
-    - backend/*.py
-    - backend/__pycache__/
+    # 只收集测试文件和配置文件，不收集 __pycache__ 和 venv
 
