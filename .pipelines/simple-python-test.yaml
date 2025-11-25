@@ -14,6 +14,10 @@ install:
   - script:
     - cd backend
     - pip install -r requirements.txt
+  - artifacts:
+    - backend/requirements.txt
+    - backend/*.txt
+    - backend/
 
 # Run tests
 test:
@@ -24,4 +28,9 @@ test:
     - cd backend
     - pip install -r requirements.txt
     - python test_ai.py || echo "Tests completed"
+  - artifacts:
+    - backend/requirements.txt
+    - backend/test_ai.py
+    - backend/*.py
+    - backend/__pycache__/
 
